@@ -2,18 +2,20 @@ version: '3.8'
 
 services:
   cuda-container:
-    image: my-custom-image
-    container_name: ubuntu_22.04-cuda_12.4.1-s1
+    image: archlinux:latest
+    container_name: archlinux
     runtime: nvidia
     ipc: host
-    working_dir: /home/arch
+    ports:
+      - "2022:22"
     volumes:
-      - ./:/home/arch/Work
-    stdin_open: true    # 对应 -i
-    tty: true          # 对应 -t
-    # environment:
-    #   - NVIDIA_VISIBLE_DEVICES=all
-    #   - NVIDIA_DRIVER_CAPABILITIES=compute,utility
+      - ./:/workspace
+    stdin_open: true
+    tty: true
+    # use your host user's UID and GID
+    environment:
+      - USER_ID=1000
+      - GROUP_ID=1000
     deploy:
       resources:
         reservations:

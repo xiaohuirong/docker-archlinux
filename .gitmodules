@@ -1,0 +1,3 @@
+[submodule "config"]
+	path = config
+	url = https://github.com/xiaohuirong/custom_archiso.git

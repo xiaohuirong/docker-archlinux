@@ -1,25 +1,27 @@
-FROM nvidia/cuda:12.4.1-devel-ubuntu22.04
+FROM archlinux:latest
 
 LABEL maintainer="hoream@qq.com"
 
-RUN apt update && apt install -y zsh fish sudo vim exa zoxide fzf git python3-pip rsync
+COPY ./config/airootfs/etc/pacman.conf /etc/pacman.conf
+COPY ./config/airootfs/etc/pacman.d /etc/pacman.d
+
+RUN pacman -Syu --noconfirm && pacman -S --noconfirm zsh vim sudo wget curl git fish atuin fzf openssh eza zoxide
 
 RUN useradd -m -s /usr/bin/zsh -p 123456abc arch
-
-# 使用 visudo 来安全地添加规则
 RUN echo 'ALL ALL=(ALL) NOPASSWD:ALL' | EDITOR='tee -a' visudo
-
-COPY ./skel /home/arch
-
+COPY ./config/airootfs/etc/skel /home/arch
 WORKDIR /home/arch
-RUN chown -R arch:arch /home/arch
+SHELL ["/bin/bash", "-c"]
+RUN mkdir -p /home/arch/.cache/vim/{backup,swap,undo}
+RUN chown -R arch:arch /home/arch && \
+    chmod 700 /home/arch
 
-# 复制 entrypoint 脚本并设置权限
 COPY entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 
-# 设置入口点
+ENV NVIDIA_VISIBLE_DEVICES=all
+ENV NVIDIA_DRIVER_CAPABILITIES=compute,utility
+
 ENTRYPOINT ["/entrypoint.sh"]
 
-USER arch
 CMD ["/bin/zsh"]
